@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import { useForm } from "react-hook-form";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -25,7 +26,6 @@ function App() {
 			try {
 				const res = await axios.get(`${BASE_URL}/v2/api/${API_PATH}/products`);
 				setProducts(res.data.products);
-        console.log('res', res.data.products);
 			} catch (error) {
 				alert("取得產品失敗");
 			}
@@ -98,7 +98,16 @@ function App() {
 			alert("更新商品失敗");
 		}
 	};
+	const{
+		register,
+		handleSubmit,
+		formState:{errors}
+	} = useForm();
+	console.log("errors", errors);
 
+	const onSubmit = handleSubmit((data)=>{
+		console.log('data',data);
+	})
 
 	return (
 		<div className="container">
@@ -201,7 +210,7 @@ function App() {
 										<td style={{ width: "150px" }}>
 											<div className="d-flex align-items-center">
 												<div className="btn-group me-2" role="group">
-													<button onClick={() => updateCartItem(cartItem.id, cartItem.product.id, cartItem.qty - 1)} type="button" className="btn btn-outline-dark btn-sm">
+													<button onClick={() => updateCartItem(cartItem.id, cartItem.product.id, cartItem.qty - 1)} disabled={(cartItem.qty = 1)} type="button" className="btn btn-outline-dark btn-sm">
 														-
 													</button>
 													<span className="btn border border-dark" style={{ width: "50px", cursor: "auto" }}>
@@ -234,14 +243,26 @@ function App() {
 			</div>
 
 			<div className="my-5 row justify-content-center">
-				<form className="col-md-6">
+				<form onSubmit={onSubmit} className="col-md-6">
 					<div className="mb-3">
 						<label htmlFor="email" className="form-label">
 							Email
 						</label>
-						<input id="email" type="email" className="form-control" placeholder="請輸入 Email" />
-
-						<p className="text-danger my-2"></p>
+						<input
+							{...register("email", {
+								required: "Email欄位必填",
+								pattern: {
+									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+									message: "Email格式不正確",
+								},
+							})}
+							id="email"
+							type="email"
+							className={`form-control ${errors.email && "is-invalid"}`}
+							placeholder="請輸入 Email"
+						/>
+						{/* {errors.email && <p className="text-danger my-2">{errors.email.message}</p>} */}
+						<p className="text-danger my-2">錯誤訊息</p>
 					</div>
 
 					<div className="mb-3">
