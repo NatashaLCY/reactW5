@@ -9,13 +9,14 @@ const API_PATH = import.meta.env.VITE_API_PATH;
 function App() {
 	const [products, setProducts] = useState([]);
 	const [tempProduct, setTempProduct] = useState([]);
+
 	const [cart, setCart] = useState({});
 
 	const getCart = async()=>{
 		try {
 			const res = await axios.get(`${BASE_URL}/v2/api/${API_PATH}/cart`);
 			setCart(res.data.data);
-			//data axios,data api
+			//data axios的data，data回傳資料的data
 		} catch (error) {
 			alert('取得購物車失敗')
 		}
@@ -56,58 +57,60 @@ function App() {
 
 	const [qtySelect, setQtySelect] = useState(1);
 
-	const addCartItem = async(product_id, qty) =>{
+	const addCartItem = async(product_id, qty)=>{
 		try {
-			await axios.post(`${BASE_URL}/v2/api/${API_PATH}/cart`,{
-				data:{
+			await axios.post(`${BASE_URL}/v2/api/${API_PATH}/cart`, {
+				data: {
 					product_id,
 					qty:Number(qty)
-				}
-			})
+				},
+			});
 			getCart();
 		} catch (error) {
 			alert('加入購物車失敗')
 		}
 	}
-	const removeCartItem = async (cartItem_id) => {
+	const removeCartItem = async(cartItem_id)=>{
 		try {
 			await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/cart/${cartItem_id}`);
 			getCart();
 		} catch (error) {
-			alert("移除商品失敗");
+			alert('移除商品失敗')
 		}
-	};
-	const removeCart = async() =>{
+	}
+	const removeCart = async(product_id, qty)=>{
 		try {
-			await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/carts`)
+			await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/carts`);
 			getCart();
 		} catch (error) {
 			alert('移除購物車失敗')
 		}
 	}
-	const updateCartItem = async (cartItem_id, product_id, qty) => {
+	const updateCartItem = async(cartItem_id, product_id, qty)=>{
 		try {
-			await axios.put(`${BASE_URL}/v2/api/${API_PATH}/cart/${cartItem_id}`, {
+			await axios.put(`${BASE_URL}/v2/api/${API_PATH}/cart/${cartItem_id}`,{
 				data:{
-					product_id,
+					product_id, 
 					qty:Number(qty)
 				}
 			});
 			getCart();
 		} catch (error) {
-			alert("更新商品失敗");
+			alert('更新購物車失敗')
 		}
-	};
-	const{
+	}
+
+	const {
 		register,
 		handleSubmit,
 		formState:{errors}
 	} = useForm();
-	console.log("errors", errors);
+	// console.log(register('email'));
 
-	const onSubmit = handleSubmit((data)=>{
-		console.log('data',data);
-	})
+	const onSubmit = handleSubmit((data) => {
+		console.log(data);
+	});
+
 
 	return (
 		<div className="container">
@@ -210,13 +213,13 @@ function App() {
 										<td style={{ width: "150px" }}>
 											<div className="d-flex align-items-center">
 												<div className="btn-group me-2" role="group">
-													<button onClick={() => updateCartItem(cartItem.id, cartItem.product.id, cartItem.qty - 1)} disabled={(cartItem.qty = 1)} type="button" className="btn btn-outline-dark btn-sm">
+													<button onClick={() => updateCartItem(cartItem.id, cartItem.product_id, cartItem.qty - 1)} disabled={cartItem.qty === 1} type="button" className="btn btn-outline-dark btn-sm">
 														-
 													</button>
 													<span className="btn border border-dark" style={{ width: "50px", cursor: "auto" }}>
 														{cartItem.qty}
 													</span>
-													<button onClick={() => updateCartItem(cartItem.id, cartItem.product.id, cartItem.qty + 1)} type="button" className="btn btn-outline-dark btn-sm">
+													<button onClick={() => updateCartItem(cartItem.id, cartItem.product_id, cartItem.qty + 1)} type="button" className="btn btn-outline-dark btn-sm">
 														+
 													</button>
 												</div>
@@ -253,16 +256,15 @@ function App() {
 								required: "Email欄位必填",
 								pattern: {
 									value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-									message: "Email格式不正確",
+									message: "Email格式錯誤",
 								},
 							})}
 							id="email"
 							type="email"
-							className={`form-control ${errors.email && "is-invalid"}`}
+							className="form-control"
 							placeholder="請輸入 Email"
 						/>
-						{/* {errors.email && <p className="text-danger my-2">{errors.email.message}</p>} */}
-						<p className="text-danger my-2">錯誤訊息</p>
+						{errors.email && <p className="text-danger my-2">{errors.email.message}</p>}
 					</div>
 
 					<div className="mb-3">
