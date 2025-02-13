@@ -103,14 +103,29 @@ function App() {
 	const {
 		register,
 		handleSubmit,
-		formState:{errors}
-	} = useForm();
+		formState: { errors },
+	} = useForm({ mode: "onTouched" });
 	// console.log(register('email'));
 
 	const onSubmit = handleSubmit((data) => {
 		console.log(data);
+		const { message, ...user } = data;
+		const userInfo = {
+			data:{
+				user,
+				message,
+			}
+		};
+		checkOut(userInfo);
 	});
 
+	const checkOut = async(data)=>{
+		try {
+			await axios.post(`${BASE_URL}/v2/api/${API_PATH}/order`, data);
+		} catch (error) {
+			alert('結帳失敗')
+		}
+	}
 
 	return (
 		<div className="container">
@@ -261,7 +276,7 @@ function App() {
 							})}
 							id="email"
 							type="email"
-							className="form-control"
+							className={`form-control ${errors.email && "is-invalid"}`}
 							placeholder="請輸入 Email"
 						/>
 						{errors.email && <p className="text-danger my-2">{errors.email.message}</p>}
@@ -271,34 +286,61 @@ function App() {
 						<label htmlFor="name" className="form-label">
 							收件人姓名
 						</label>
-						<input id="name" className="form-control" placeholder="請輸入姓名" />
+						<input
+							{...register("name", {
+								required: "姓名欄位必填",
+							})}
+							id="name"
+							className={`form-control ${errors.name && "is-invalid"}`}
+							placeholder="請輸入姓名"
+						/>
 
-						<p className="text-danger my-2"></p>
+						{errors.name && <p className="text-danger my-2">{errors.name.message}</p>}
 					</div>
 
 					<div className="mb-3">
 						<label htmlFor="tel" className="form-label">
 							收件人電話
 						</label>
-						<input id="tel" type="text" className="form-control" placeholder="請輸入電話" />
+						<input
+							{...register("tel", {
+								required: "電話欄位必填",
+								pattern: {
+									value: /^(0[2-8]\d{7}|09\d{8})$/,
+									message: "電話格式錯誤",
+								},
+							})}
+							id="tel"
+							type="text"
+							className={`form-control ${errors.tel && "is-invalid"}`}
+							placeholder="請輸入電話"
+						/>
 
-						<p className="text-danger my-2"></p>
+						{errors.tel && <p className="text-danger my-2">{errors.tel.message}</p>}
 					</div>
 
 					<div className="mb-3">
 						<label htmlFor="address" className="form-label">
 							收件人地址
 						</label>
-						<input id="address" type="text" className="form-control" placeholder="請輸入地址" />
+						<input
+							{...register("address", {
+								required: "地址欄位必填",
+							})}
+							id="address"
+							type="text"
+							className={`form-control ${errors.address && "is-invalid"}`}
+							placeholder="請輸入地址"
+						/>
 
-						<p className="text-danger my-2"></p>
+						{errors.address && <p className="text-danger my-2">{errors.address.message}</p>}
 					</div>
 
 					<div className="mb-3">
 						<label htmlFor="message" className="form-label">
 							留言
 						</label>
-						<textarea id="message" className="form-control" cols="30" rows="10"></textarea>
+						<textarea {...register("message")} id="message" className="form-control" cols="30" rows="10"></textarea>
 					</div>
 					<div className="text-end">
 						<button type="submit" className="btn btn-danger">
