@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import { useForm } from "react-hook-form";
+import ReactLoading from "react-loading";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -11,6 +12,8 @@ function App() {
 	const [tempProduct, setTempProduct] = useState([]);
 
 	const [cart, setCart] = useState({});
+
+	const [isScreenLoading, setIsScreenLoading] = useState(false);
 
 	const getCart = async()=>{
 		try {
@@ -24,11 +27,14 @@ function App() {
 
 	useEffect(() => {
 		const getProducts = async () => {
+			setIsScreenLoading(true);
 			try {
 				const res = await axios.get(`${BASE_URL}/v2/api/${API_PATH}/products`);
 				setProducts(res.data.products);
 			} catch (error) {
 				alert("取得產品失敗");
+			} finally{
+				setIsScreenLoading(false);
 			}
 		};
 		getProducts();
@@ -71,22 +77,29 @@ function App() {
 		}
 	}
 	const removeCartItem = async(cartItem_id)=>{
+		setIsScreenLoading(true);
 		try {
 			await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/cart/${cartItem_id}`);
 			getCart();
 		} catch (error) {
 			alert('移除商品失敗')
+		} finally{
+			setIsScreenLoading(false);
 		}
 	}
 	const removeCart = async(product_id, qty)=>{
+		setIsScreenLoading(true);
 		try {
 			await axios.delete(`${BASE_URL}/v2/api/${API_PATH}/carts`);
 			getCart();
 		} catch (error) {
 			alert('移除購物車失敗')
+		} finally{
+			setIsScreenLoading(false);
 		}
 	}
 	const updateCartItem = async(cartItem_id, product_id, qty)=>{
+		setIsScreenLoading(true);
 		try {
 			await axios.put(`${BASE_URL}/v2/api/${API_PATH}/cart/${cartItem_id}`,{
 				data:{
@@ -97,6 +110,8 @@ function App() {
 			getCart();
 		} catch (error) {
 			alert('更新購物車失敗')
+		} finally{
+			setIsScreenLoading(false);
 		}
 	}
 
@@ -104,6 +119,7 @@ function App() {
 		register,
 		handleSubmit,
 		formState: { errors },
+		reset
 	} = useForm({ mode: "onTouched" });
 	// console.log(register('email'));
 
@@ -120,10 +136,14 @@ function App() {
 	});
 
 	const checkOut = async(data)=>{
+		setIsScreenLoading(true);
 		try {
 			await axios.post(`${BASE_URL}/v2/api/${API_PATH}/order`, data);
+			reset();
 		} catch (error) {
 			alert('結帳失敗')
+		} finally{
+			setIsScreenLoading(false);
 		}
 	}
 
@@ -343,12 +363,25 @@ function App() {
 						<textarea {...register("message")} id="message" className="form-control" cols="30" rows="10"></textarea>
 					</div>
 					<div className="text-end">
-						<button type="submit" className="btn btn-danger">
+						<button type="submit" disabled={cart.carts?.length === 0} className="btn btn-danger">
 							送出訂單
 						</button>
 					</div>
 				</form>
 			</div>
+			{isScreenLoading && (
+				<div
+					className="d-flex justify-content-center align-items-center"
+					style={{
+						position: "fixed",
+						inset: 0,
+						backgroundColor: "rgba(255,255,255,0.3)",
+						zIndex: 999,
+					}}
+				>
+					<ReactLoading type="spin" color="black" width="4rem" height="4rem" />
+				</div>
+			)}
 		</div>
 	);
 }
