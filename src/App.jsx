@@ -14,6 +14,7 @@ function App() {
 	const [cart, setCart] = useState({});
 
 	const [isScreenLoading, setIsScreenLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const getCart = async()=>{
 		try {
@@ -64,6 +65,7 @@ function App() {
 	const [qtySelect, setQtySelect] = useState(1);
 
 	const addCartItem = async(product_id, qty)=>{
+		setIsLoading(true);
 		try {
 			await axios.post(`${BASE_URL}/v2/api/${API_PATH}/cart`, {
 				data: {
@@ -74,6 +76,8 @@ function App() {
 			getCart();
 		} catch (error) {
 			alert('加入購物車失敗')
+		} finally{
+			setIsLoading(false);
 		}
 	}
 	const removeCartItem = async(cartItem_id)=>{
@@ -175,8 +179,9 @@ function App() {
 										<button onClick={() => handleSeeMore(product)} type="button" className="btn btn-outline-secondary">
 											查看更多
 										</button>
-										<button onClick={() => addCartItem(product.id, 1)} type="button" className="btn btn-outline-danger">
+										<button disabled={isLoading} onClick={() => addCartItem(product.id, 1)} type="button" className="btn btn-outline-danger d-flex align-items-center gap-2">
 											加到購物車
+											{isLoading && <ReactLoading type={"spin"} color={"#000"} height={"1.5rem"} width={"1.5rem"} />}
 										</button>
 									</div>
 								</td>
@@ -211,8 +216,9 @@ function App() {
 								</div>
 							</div>
 							<div className="modal-footer">
-								<button onClick={() => addCartItem(tempProduct.id, qtySelect)} type="button" className="btn btn-primary">
+								<button disabled={isLoading} onClick={() => addCartItem(tempProduct.id, qtySelect)} type="button" className="btn btn-primary d-flex align-items-center gap-2">
 									加入購物車
+									{isLoading && <ReactLoading type={"spin"} color={"#000"} height={"1.5rem"} width={"1.5rem"} />}
 								</button>
 							</div>
 						</div>
